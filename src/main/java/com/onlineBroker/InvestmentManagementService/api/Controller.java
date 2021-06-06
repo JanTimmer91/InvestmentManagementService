@@ -38,19 +38,19 @@ public class Controller {
         return investmentManagementService.getInvestmentOfUser(userId, stockSymbol);
     }
 
-    @PostMapping(value = "/investmentService/{userId}/watchlist/{stockSymbol}")
+    @PostMapping(value = "/investmentService/users/{userId}/watchlist/{stockSymbol}")
     @CrossOrigin(origins = {"http://localhost:3000"}) //for local development
     public void addWatchlistItem(@PathVariable String userId, @PathVariable String stockSymbol) {
         investmentManagementService.addWatchlistItem(userId, stockSymbol);
     }
 
-    @PostMapping(value = "/investmentService/{userId}/depotBalance")
+    @PostMapping(value = "/investmentService/users/{userId}/depotBalance")
     @CrossOrigin(origins = {"http://localhost:3000"}) //for local development
     public void updateDepotBalance(@RequestBody DepotBalanceDTO depotBalanceDTO) {
         investmentManagementService.updateDepotBalanceOfUserEntity(depotBalanceDTO);
     }
 
-    @DeleteMapping(value = "/investmentService/{userId}/watchlist/{stockSymbol}")
+    @DeleteMapping(value = "/investmentService/users/{userId}/watchlist/{stockSymbol}")
     @CrossOrigin(origins = {"http://localhost:3000"}) //for local development
     public void removeWatchlistItem(@PathVariable String userId, @PathVariable String stockSymbol) {
         investmentManagementService.removeWatchlistItem(userId, stockSymbol);

@@ -23,8 +23,10 @@ public class InvestmentManagementService {
 
     public boolean checkIfUserExists(String userId){
         if(repository.findByUserId(userId) == null){
+            System.out.println("User with userId " +userId +" doesn't exist");
             return false;
         }else{
+            System.out.println("User with userId " +userId +" exists");
             return true;
         }
     }
@@ -38,7 +40,7 @@ public class InvestmentManagementService {
                     0.0,
                     new ArrayList<>()
             );
-
+            System.out.println("New user created!");
             repository.save(userEntity);
         }else{
             System.out.println("Can't create user, user already exists!");
@@ -212,7 +214,7 @@ public class InvestmentManagementService {
     }
 
     public UserEntity getUser(String userId) {
-        return repository.findByUserId(userId);
+            return repository.findByUserId(userId);
     }
 
     public InvestmentEntity getInvestmentOfUser(String userId, String stockSymbol) {
@@ -220,19 +222,24 @@ public class InvestmentManagementService {
     }
 
     public void addWatchlistItem(String userId, String stockSymbol) {
-        userEntity = this.getUser(userId);
-        userEntity.getWatchlist().add(stockSymbol);
-        saveUser();
+        if(this.checkIfUserExists(userId)) {
+            this.getUser(userId);
+            userEntity.getWatchlist().add(stockSymbol);
+            saveUser();
+            System.out.println("Stock symbol " +stockSymbol +" added to watchlist for user " +userId);
+        }
     }
 
     public void removeWatchlistItem(String userId, String stockSymbol) {
         userEntity = this.getUser(userId);
         userEntity.getWatchlist().remove(stockSymbol);
         saveUser();
+        System.out.println("stockSymbol " +stockSymbol +" removed from watchlist for user " +userId);
+
     }
 
     public ArrayList<String> getWatchlist(String userId) {
-        userEntity = this.getUser(userId);
+        System.out.println("Watchlist retrieved for user " +userId);
         return userEntity.getWatchlist();
     }
 
