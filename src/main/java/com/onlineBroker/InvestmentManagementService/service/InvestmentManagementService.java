@@ -240,6 +240,7 @@ public class InvestmentManagementService {
 
     public ArrayList<String> getWatchlist(String userId) {
         System.out.println("Watchlist retrieved for user " +userId);
+        userEntity = this.getUser(userId);
         return userEntity.getWatchlist();
     }
 

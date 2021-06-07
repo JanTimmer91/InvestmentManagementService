@@ -56,7 +56,7 @@ public class Controller {
         investmentManagementService.removeWatchlistItem(userId, stockSymbol);
     }
 
-    @GetMapping(value = "/investmentService/{userId}/watchlist")
+    @GetMapping(value = "/investmentService/users/{userId}/watchlist")
     @CrossOrigin(origins = {"http://localhost:3000"}) //for local development
     public ArrayList<String> getWatchlist(@PathVariable String userId) {
         return investmentManagementService.getWatchlist(userId);
