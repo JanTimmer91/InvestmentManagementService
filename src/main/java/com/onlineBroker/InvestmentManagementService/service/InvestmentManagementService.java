@@ -223,8 +223,9 @@ public class InvestmentManagementService {
 
     public void addWatchlistItem(String userId, String stockSymbol) {
         if(this.checkIfUserExists(userId)) {
-            this.getUser(userId);
+            userEntity = this.getUser(userId);
             userEntity.getWatchlist().add(stockSymbol);
+            System.out.println(userEntity.getUserId());
             saveUser();
             System.out.println("Stock symbol " +stockSymbol +" added to watchlist for user " +userId);
         }
