@@ -5,8 +5,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.TreeMap;
+
+/*
+This class represents a user.
+A user can have multiple investments in multiple stocks.
+ */
 
 @Getter
 @Setter
@@ -19,11 +23,10 @@ public class UserEntity {
     private String userId;
 
     //key: stockSymbol, value: InvestmentEntity
-    private TreeMap<String, InvestmentEntity> stockInvestments;
+    private TreeMap<String, StockInvestmentEntity> stockInvestments;
 
     //Alternativ
     //private TreeMap<String, LinkedList<InvestmentEntity>> stockInvestments;
-
 
     private double depotBalance;
     private double realizedProfitLossOfUserEntity;

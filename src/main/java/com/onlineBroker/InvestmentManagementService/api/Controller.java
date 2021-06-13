@@ -1,12 +1,9 @@
 package com.onlineBroker.InvestmentManagementService.api;
 
 import com.onlineBroker.InvestmentManagementService.dto.DepotBalanceDTO;
-import com.onlineBroker.InvestmentManagementService.dto.OrderDTO;
-import com.onlineBroker.InvestmentManagementService.persistence.entity.InvestmentEntity;
+import com.onlineBroker.InvestmentManagementService.persistence.entity.StockInvestmentEntity;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.UserEntity;
-import com.onlineBroker.InvestmentManagementService.persistence.repository.InvestmentRepository;
 import com.onlineBroker.InvestmentManagementService.service.InvestmentManagementService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -29,13 +26,16 @@ public class Controller {
     @GetMapping(value = "/investmentService/users/{userId}")
     @CrossOrigin(origins = {"http://localhost:3000"}) //for local development
     public UserEntity getUser(@PathVariable String userId) {
-        return investmentManagementService.getUser(userId);
+        investmentManagementService.initializeUser(userId);
+        return investmentManagementService.getUserEntity();
     }
 
     @GetMapping(value = "/investmentService/users/{userId}/investments/{stockSymbol}")
     @CrossOrigin(origins = {"http://localhost:3000"}) //for local development
-    public InvestmentEntity getInvestmentOfUser(@PathVariable String userId, @PathVariable String stockSymbol) {
-        return investmentManagementService.getInvestmentOfUser(userId, stockSymbol);
+    public StockInvestmentEntity getInvestmentOfUser(@PathVariable String userId, @PathVariable String stockSymbol) {
+        investmentManagementService.initializeUser(userId);
+        investmentManagementService.initializeSpecificInvestment(stockSymbol);
+        return investmentManagementService.getSingleStockInvestmentEntity();
     }
 
     @PostMapping(value = "/investmentService/users/{userId}/watchlist/{stockSymbol}")
@@ -47,7 +47,7 @@ public class Controller {
     @PostMapping(value = "/investmentService/users/{userId}/depotBalance")
     @CrossOrigin(origins = {"http://localhost:3000"}) //for local development
     public void updateDepotBalance(@RequestBody DepotBalanceDTO depotBalanceDTO) {
-        investmentManagementService.updateDepotBalanceOfUserEntity(depotBalanceDTO);
+        investmentManagementService.calculateNewDepotBalanceOfUserEntity(depotBalanceDTO);
     }
 
     @DeleteMapping(value = "/investmentService/users/{userId}/watchlist/{stockSymbol}")
@@ -59,7 +59,7 @@ public class Controller {
     @GetMapping(value = "/investmentService/users/{userId}/watchlist")
     @CrossOrigin(origins = {"http://localhost:3000"}) //for local development
     public ArrayList<String> getWatchlist(@PathVariable String userId) {
-        return investmentManagementService.getWatchlist(userId);
+        return investmentManagementService.findWatchlist(userId);
     }
 
     /*
