@@ -4,6 +4,6 @@ import com.onlineBroker.InvestmentManagementService.persistence.entity.UserEntit
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 
-public interface InvestmentRepository extends MongoRepository<UserEntity, Integer> {
+public interface UserRepository extends MongoRepository<UserEntity, Integer> {
     UserEntity findByUserId(String userId);
 }

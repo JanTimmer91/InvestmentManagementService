@@ -1,59 +1,33 @@
-package com.onlineBroker.InvestmentManagementService.service;
+package com.onlineBroker.InvestmentManagementService.business;
 
 import com.onlineBroker.InvestmentManagementService.dto.DepotBalanceDTO;
 import com.onlineBroker.InvestmentManagementService.dto.OrderDTO;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.StockInvestmentEntity;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.ShareEntity;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.UserEntity;
-import com.onlineBroker.InvestmentManagementService.persistence.repository.InvestmentRepository;
+import com.onlineBroker.InvestmentManagementService.persistence.service.UserService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.UUID;
+
 @Getter
 @Setter
 @Service
 public class InvestmentManagementService {
 
     @Autowired
-    private InvestmentRepository repository;
+    private UserService userService;
 
     UserEntity userEntity;
-
     StockInvestmentEntity singleStockInvestmentEntity;
     OrderDTO orderDTO;
 
-    public boolean isUserExisting(String userId){
-        System.out.println("Check if user exists...");
-
-        if(repository.findByUserId(userId) == null){
-            System.out.println("User with userId " +userId +" doesn't exist!");
-            return false;
-        }else{
-            System.out.println("User with userId " +userId +" exists!");
-            return true;
-        }
-    }
-
-    public void createNewUserEntity(String userId) {
-        if(!this.isUserExisting(userId)) {
-            userEntity = new UserEntity(
-                    userId,
-                    new TreeMap<>(),
-                    0.0,
-                    0.0,
-                    new ArrayList<>()
-            );
-            System.out.println("New user created!");
-            repository.save(userEntity);
-        }else{
-            System.out.println("Can't create user, user already exists!");
-        }
-    }
-
-    public void handleOrder(OrderDTO orderDTO) {
+    public void handleIncomingOrder(OrderDTO orderDTO) {
         this.orderDTO = orderDTO;
 
         initializeUser(orderDTO.getUserId());
@@ -67,20 +41,15 @@ public class InvestmentManagementService {
             beginFlowOnSellOrder();
        }
     }
+
     public void initializeUser(String userId) {
-        userEntity = findUserEntity(userId);
-    }
-    public void initializeSpecificInvestment(String stockSymbol) {
-        singleStockInvestmentEntity = findSingleStockInvestmentFromUserEntity(stockSymbol);
+        userEntity = userService.findUserEntity(userId);
     }
 
-    public UserEntity findUserEntity(String userId){
-        System.out.println("Find user entity in repository...");
-        try {
-            return repository.findByUserId(userId);
-        }catch(NullPointerException e){
-            System.out.println("User with userId " + userId + " hasn't been found");
-            return null;
+    public void initializeSpecificInvestment(String stockSymbol) {
+        singleStockInvestmentEntity = findSingleStockInvestmentFromUserEntity(stockSymbol);
+        if(singleStockInvestmentEntity == null && orderDTO != null && orderDTO.getOrderId().equals("OPEN")){
+            createUserInvestment();
         }
     }
 
@@ -90,14 +59,9 @@ public class InvestmentManagementService {
             return userEntity.getStockInvestments().get(stockSymbol);
         }else{
             System.out.println("No investment found for symbol: "  +stockSymbol);
-            if(orderDTO != null && orderDTO.getOrderId().equals("OPEN")){
-                createUserInvestment();
-            }
             return null;
         }
     }
-
-
     public void createUserInvestment() {
         singleStockInvestmentEntity = new StockInvestmentEntity(
                 UUID.randomUUID().toString(),
@@ -109,16 +73,17 @@ public class InvestmentManagementService {
         );
     }
 
-    void beginFlowOnBuyOrder(){
+
+    public void beginFlowOnBuyOrder(){
         decreaseDepotBalanceOfUserEntity();
         increaseSharesInPossession();
         calculateNewAveragePriceOfSingleInvestment();
         increaseSingleInvestmentValueOnOpen();
         saveSingleInvestment();
-        saveUser();
+        userService.saveUserEntity(userEntity);
     }
 
-    void beginFlowOnSellOrder() {
+    public void beginFlowOnSellOrder() {
         //do for each share unit
         for (int i = 0; i < orderDTO.getUnits(); i++) {
             calculateNewProfitLossOfShareEntity();
@@ -132,10 +97,10 @@ public class InvestmentManagementService {
         }
         calculateNewAveragePriceOfSingleInvestment();
         saveSingleInvestment();
-        saveUser();
+        userService.saveUserEntity(userEntity);
     }
 
-    void increaseSharesInPossession() {
+    public void increaseSharesInPossession() {
         System.out.println("Increase shares in possession...");
         System.out.println("Amount of shares to add: " + orderDTO.getUnits());
         for(int i = 0; i < orderDTO.getUnits(); i++) {
@@ -153,7 +118,7 @@ public class InvestmentManagementService {
         }
     }
 
-    void calculateNewAveragePriceOfSingleInvestment(){
+    public void calculateNewAveragePriceOfSingleInvestment(){
         System.out.println("Update average price of investment for stock symbol: " +orderDTO.getStockSymbol());
 
         double AmountOfSharesInTotal = singleStockInvestmentEntity.getSharesInPossession().size();
@@ -168,12 +133,12 @@ public class InvestmentManagementService {
         }
     }
 
-    void increaseSingleInvestmentValueOnOpen() {
+    public void increaseSingleInvestmentValueOnOpen() {
         System.out.println("Increase value of investment for stock symbol: " +orderDTO.getStockSymbol());
         singleStockInvestmentEntity.setValueOfInvestment(singleStockInvestmentEntity.getValueOfInvestment() + (this.orderDTO.getUnits() * this.orderDTO.getPrice()));
     }
 
-    private void decreaseSingleInvestmentValueOnClose() {
+    public void decreaseSingleInvestmentValueOnClose() {
         System.out.println("Decrease value of investment for stock symbol: " +orderDTO.getStockSymbol());
         singleStockInvestmentEntity.setValueOfInvestment(singleStockInvestmentEntity.getValueOfInvestment() - singleStockInvestmentEntity.getSharesInPossession().get(0).getOpenPrice());
     }
@@ -183,37 +148,35 @@ public class InvestmentManagementService {
         userEntity.getStockInvestments().put(orderDTO.getStockSymbol(), singleStockInvestmentEntity);
     }
 
-    public void saveUser() {
-        repository.save(userEntity);
-    }
-        void decreaseDepotBalanceOfUserEntity(){
+
+     public void decreaseDepotBalanceOfUserEntity(){
         userEntity.setDepotBalance(userEntity.getDepotBalance()-orderDTO.getPrice() * orderDTO.getUnits());
     }
 
-    private void increaseDepotBalanceOfUserEntity() {
+    public void increaseDepotBalanceOfUserEntity() {
         System.out.println("Update depot balance of user: " +orderDTO.getUserId());
         userEntity.setDepotBalance(userEntity.getDepotBalance()
                 + singleStockInvestmentEntity.getSharesInPossession().get(0).getOpenPrice()
                 + singleStockInvestmentEntity.getSharesInPossession().get(0).getProfitLossOfShare());
     }
 
-    private void markShareAsClosed() {
+    public void markShareAsClosed() {
         System.out.println("Update ShareEntity with close order data...");
         singleStockInvestmentEntity.getSharesInPossession().get(0).setClosePrice(orderDTO.getPrice());
         singleStockInvestmentEntity.getSharesInPossession().get(0).setDateClosed(orderDTO.getDate());
         singleStockInvestmentEntity.getSharesInPossession().get(0).setStatus("CLOSED");
     }
 
-    private void moveShareToClosedSharesList() {
+    public void moveShareToClosedSharesList() {
         System.out.println("Mark share as closed/sold by moving it to List sharesSold...");
         singleStockInvestmentEntity.getSharesSold().add(singleStockInvestmentEntity.getSharesInPossession().get(0));
     }
 
-    private void decreaseSharesInPossession(){
+    public void decreaseSharesInPossession(){
         singleStockInvestmentEntity.getSharesInPossession().remove(0);
     }
 
-    private void calculateNewProfitLossOfShareEntity() {
+    public void calculateNewProfitLossOfShareEntity() {
         double profitLossOfShare = orderDTO.getPrice()
                 - singleStockInvestmentEntity.getSharesInPossession().get(0).getOpenPrice();
 
@@ -223,7 +186,7 @@ public class InvestmentManagementService {
                 .setProfitLossOfShare(profitLossOfShare);
     }
 
-    private void calculateNewProfitLossOfInvestment() {
+    public void calculateNewProfitLossOfInvestment() {
         double oldRealizedProfitLossOfInvestment = singleStockInvestmentEntity.getRealizedProfitLossOfInvestment();
 
         System.out.println("Calculate new profit/loss of investment in Stock: " +orderDTO.getStockSymbol());
@@ -231,37 +194,13 @@ public class InvestmentManagementService {
                 + singleStockInvestmentEntity.getSharesInPossession().get(0).getProfitLossOfShare());
     }
 
-    private void calculateNewProfitLossOfUserEntity() {
+    public void calculateNewProfitLossOfUserEntity() {
         System.out.println("Update realized profit/loss of user: " +orderDTO.getUserId());
         userEntity.setRealizedProfitLossOfUserEntity(userEntity.getRealizedProfitLossOfUserEntity()
                 + singleStockInvestmentEntity.getSharesInPossession().get(0).getProfitLossOfShare());
     }
 
-    public void addWatchlistItem(String userId, String stockSymbol) {
-        if(this.isUserExisting(userId)) {
-            userEntity = this.findUserEntity(userId);
-            userEntity.getWatchlist().add(stockSymbol);
-            saveUser();
-            System.out.println("Stock symbol " +stockSymbol +" added to watchlist for user " +userId);
-        }
-    }
-
-    public void removeWatchlistItem(String userId, String stockSymbol) {
-        userEntity = this.findUserEntity(userId);
-        userEntity.getWatchlist().remove(stockSymbol);
-        saveUser();
-        System.out.println("stockSymbol " +stockSymbol +" removed from watchlist for user " +userId);
-
-    }
-
-    public ArrayList<String> findWatchlist(String userId) {
-        System.out.println("Watchlist retrieved for user " +userId);
-        userEntity = this.findUserEntity(userId);
-        return userEntity.getWatchlist();
-    }
-
     public void calculateNewDepotBalanceOfUserEntity(DepotBalanceDTO depotBalanceDTO){
-        userEntity = this.findUserEntity(depotBalanceDTO.getUserId());
         if((depotBalanceDTO.isShouldIncrease())) {
             userEntity.setDepotBalance(userEntity.getDepotBalance() + (depotBalanceDTO.getAmount()));
             System.out.println("Depot balance increased for userId " +depotBalanceDTO.getUserId());
@@ -273,14 +212,6 @@ public class InvestmentManagementService {
                 System.out.println("Depot balance decreased for userId " +depotBalanceDTO.getUserId());
             }
         }
-        saveUser();
+        userService.saveUserEntity(userEntity);
     }
-
-/*
-    public static void addPriceAlert(String stockSymbol, Double price) {
-    }
-
-    public static void deletePriceAlert(String stockSymbol, Double price) {
-    }
-*/
 }
