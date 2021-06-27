@@ -39,5 +39,4 @@ public class CommandController {
     public void removeWatchlistItem(@PathVariable String userId, @PathVariable String stockSymbol) {
         userServiceImpl.removeWatchlistItem(userId, stockSymbol);
     }
-
 }

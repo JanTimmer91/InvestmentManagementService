@@ -14,13 +14,14 @@ public class OrderSubscriber {
     @Autowired
     InvestmentTransformationServiceImpl investmentTransformationServiceImpl;
 
-    @Autowired
-    UserServiceImpl userServiceImpl;
-
     @RabbitListener(queues = MessagingConfig.INVESTMENTSERVICE_ORDER_QUEUE)
     public void consumeNewOrderFromQueue(OrderDTO orderDTO) {
         System.out.println("Order " +orderDTO.getOrderId() +" received from exchange "
                 + MessagingConfig.ORDERSERVICE_ORDER_EXCHANGE +" and queue " +MessagingConfig.INVESTMENTSERVICE_ORDER_QUEUE +"...");
+        this.forwardOrder(orderDTO);
+    }
+
+    public void forwardOrder(OrderDTO orderDTO){
         investmentTransformationServiceImpl.handleIncomingOrder(orderDTO);
     }
 }
