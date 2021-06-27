@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.UUID;
@@ -30,7 +31,9 @@ public class InvestmentTransformationServiceImpl implements InvestmentTransforma
 
         //initialize required data in service
         this.setOrderDTO(orderDTO);
+        System.out.println("Initialize user " +orderDTO.getUserId());
         this.initializeUser(orderDTO.getUserId());
+        System.out.println("Initialize specific investment for user " +orderDTO.getUserId());
         this.initializeSpecificInvestment(orderDTO.getStockSymbol());
 
 
@@ -48,18 +51,26 @@ public class InvestmentTransformationServiceImpl implements InvestmentTransforma
     }
 
     public void initializeSpecificInvestment(String stockSymbol) {
-        singleStockInvestmentEntity = findSingleStockInvestmentFromUserEntity(stockSymbol);
-        if(singleStockInvestmentEntity == null && orderDTO != null && orderDTO.getOrderId().equals("OPEN")){
+
+        if(findSingleStockInvestmentFromUserEntity(stockSymbol) == null && orderDTO != null && orderDTO.getType().equals("OPEN")){
+            System.out.println("Create empty user investment...");
             createUserInvestment();
+        }else{
+            singleStockInvestmentEntity = findSingleStockInvestmentFromUserEntity(stockSymbol);
         }
     }
 
     public StockInvestmentEntity findSingleStockInvestmentFromUserEntity(String stockSymbol){
         System.out.println("find single user investment by stock symbol: " +stockSymbol);
-        if(userEntity.getStockInvestments().containsKey(stockSymbol)){
-            return userEntity.getStockInvestments().get(stockSymbol);
-        }else{
-            System.out.println("No investment found for symbol: "  +stockSymbol);
+        try {
+            if (userEntity.getStockInvestments().containsKey(stockSymbol)) {
+                return userEntity.getStockInvestments().get(stockSymbol);
+            } else {
+                System.out.println("No investment found for symbol: " + stockSymbol);
+                return null;
+            }
+        }catch(NullPointerException e){
+            System.out.println("No investment found for symbol: " + stockSymbol);
             return null;
         }
     }
