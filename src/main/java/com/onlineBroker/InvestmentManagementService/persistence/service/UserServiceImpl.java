@@ -1,5 +1,6 @@
 package com.onlineBroker.InvestmentManagementService.persistence.service;
 
+import com.onlineBroker.InvestmentManagementService.dto.WatchlistDTO;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.UserEntity;
 import com.onlineBroker.InvestmentManagementService.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,8 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 @Service
-public class UserService {
+public class UserServiceImpl implements UserServiceInterface {
+
     @Autowired
     private UserRepository repository;
 
@@ -30,11 +32,10 @@ public class UserService {
                 userId,
                 new TreeMap<>(),
                 0.0,
-                0.0,
                 new ArrayList<>()
         );
         System.out.println("New user created!");
-        return userEntity;
+        return saveUserEntity(userEntity);
     }
 
     public UserEntity findUserEntity(String userId){
@@ -54,7 +55,23 @@ public class UserService {
         return null;
     }
 
-    public void createWatchlistItem(String userId, String stockSymbol) {
+    /*
+    public void setNewDepotBalanceOfUserEntity(DepotBalanceDTO depotBalanceDTO){
+        if((depotBalanceDTO.isShouldIncrease())) {
+            userEntity.setDepotBalance(userEntity.getDepotBalance() + (depotBalanceDTO.getAmount()));
+            System.out.println("Depot balance increased for userId " +depotBalanceDTO.getUserId());
+        }else{
+            if(userEntity.getDepotBalance() - depotBalanceDTO.getAmount() < 0){
+                System.out.println("Depot balance can't be lower than 0");
+            }else {
+                userEntity.setDepotBalance(userEntity.getDepotBalance() - depotBalanceDTO.getAmount());
+                System.out.println("Depot balance decreased for userId " +depotBalanceDTO.getUserId());
+            }
+        }
+        saveUserEntity(userEntity);
+    }
+*/
+    public void addWatchlistItem(String userId, String stockSymbol) {
         UserEntity userEntity = repository.findByUserId(userId);
         userEntity.getWatchlist().add(stockSymbol);
         this.saveUserEntity(userEntity);
@@ -69,9 +86,9 @@ public class UserService {
 
     }
 
-    public ArrayList<String> findWatchlist(String userId) {
+    public WatchlistDTO findWatchlist(String userId) {
         System.out.println("Watchlist retrieved for user " +userId);
-        return repository.findByUserId(userId).getWatchlist();
+        WatchlistDTO watchlistDTO = new WatchlistDTO(repository.findByUserId(userId).getWatchlist());
+        return watchlistDTO;
     }
-
 }

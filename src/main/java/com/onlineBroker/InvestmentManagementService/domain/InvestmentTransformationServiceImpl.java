@@ -1,11 +1,10 @@
-package com.onlineBroker.InvestmentManagementService.business;
+package com.onlineBroker.InvestmentManagementService.domain;
 
-import com.onlineBroker.InvestmentManagementService.dto.DepotBalanceDTO;
 import com.onlineBroker.InvestmentManagementService.dto.OrderDTO;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.StockInvestmentEntity;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.ShareEntity;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.UserEntity;
-import com.onlineBroker.InvestmentManagementService.persistence.service.UserService;
+import com.onlineBroker.InvestmentManagementService.persistence.service.UserServiceImpl;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,32 +17,34 @@ import java.util.UUID;
 @Getter
 @Setter
 @Service
-public class InvestmentManagementService {
+public class InvestmentTransformationServiceImpl implements InvestmentTransformationServiceInterface {
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     UserEntity userEntity;
     StockInvestmentEntity singleStockInvestmentEntity;
     OrderDTO orderDTO;
 
     public void handleIncomingOrder(OrderDTO orderDTO) {
-        this.orderDTO = orderDTO;
 
-        initializeUser(orderDTO.getUserId());
-        initializeSpecificInvestment(orderDTO.getStockSymbol());
+        //initialize required data in service
+        this.setOrderDTO(orderDTO);
+        this.initializeUser(orderDTO.getUserId());
+        this.initializeSpecificInvestment(orderDTO.getStockSymbol());
+
 
         if(orderDTO.getType().equals("OPEN")){
             System.out.println("Order is of type OPEN. Begin open flow...");
-           beginFlowOnBuyOrder();
-       } else{
+            this.beginTransformationFlowOnBuyOrder();
+        } else{
             System.out.println("Order is of type CLOSE. Begin close flow...");
-            beginFlowOnSellOrder();
-       }
+            this.beginTransformationFlowOnSellOrder();
+        }
     }
 
     public void initializeUser(String userId) {
-        userEntity = userService.findUserEntity(userId);
+        userEntity = userServiceImpl.findUserEntity(userId);
     }
 
     public void initializeSpecificInvestment(String stockSymbol) {
@@ -73,23 +74,22 @@ public class InvestmentManagementService {
         );
     }
 
-
-    public void beginFlowOnBuyOrder(){
-        decreaseDepotBalanceOfUserEntity();
+    public void beginTransformationFlowOnBuyOrder(){
+        //decreaseDepotBalanceOfUserEntity();
         increaseSharesInPossession();
         calculateNewAveragePriceOfSingleInvestment();
         increaseSingleInvestmentValueOnOpen();
         saveSingleInvestment();
-        userService.saveUserEntity(userEntity);
+        userServiceImpl.saveUserEntity(userEntity);
     }
 
-    public void beginFlowOnSellOrder() {
+    public void beginTransformationFlowOnSellOrder() {
         //do for each share unit
         for (int i = 0; i < orderDTO.getUnits(); i++) {
             calculateNewProfitLossOfShareEntity();
-            increaseDepotBalanceOfUserEntity();
+            //increaseDepotBalanceOfUserEntity();
             calculateNewProfitLossOfInvestment();
-            calculateNewProfitLossOfUserEntity();
+            calculateNewProfitLossOfAllInvestments();
             decreaseSingleInvestmentValueOnClose();
             markShareAsClosed();
             moveShareToClosedSharesList();
@@ -97,7 +97,7 @@ public class InvestmentManagementService {
         }
         calculateNewAveragePriceOfSingleInvestment();
         saveSingleInvestment();
-        userService.saveUserEntity(userEntity);
+        userServiceImpl.saveUserEntity(userEntity);
     }
 
     public void increaseSharesInPossession() {
@@ -149,17 +149,6 @@ public class InvestmentManagementService {
     }
 
 
-     public void decreaseDepotBalanceOfUserEntity(){
-        userEntity.setDepotBalance(userEntity.getDepotBalance()-orderDTO.getPrice() * orderDTO.getUnits());
-    }
-
-    public void increaseDepotBalanceOfUserEntity() {
-        System.out.println("Update depot balance of user: " +orderDTO.getUserId());
-        userEntity.setDepotBalance(userEntity.getDepotBalance()
-                + singleStockInvestmentEntity.getSharesInPossession().get(0).getOpenPrice()
-                + singleStockInvestmentEntity.getSharesInPossession().get(0).getProfitLossOfShare());
-    }
-
     public void markShareAsClosed() {
         System.out.println("Update ShareEntity with close order data...");
         singleStockInvestmentEntity.getSharesInPossession().get(0).setClosePrice(orderDTO.getPrice());
@@ -194,12 +183,13 @@ public class InvestmentManagementService {
                 + singleStockInvestmentEntity.getSharesInPossession().get(0).getProfitLossOfShare());
     }
 
-    public void calculateNewProfitLossOfUserEntity() {
+    public void calculateNewProfitLossOfAllInvestments() {
         System.out.println("Update realized profit/loss of user: " +orderDTO.getUserId());
         userEntity.setRealizedProfitLossOfUserEntity(userEntity.getRealizedProfitLossOfUserEntity()
                 + singleStockInvestmentEntity.getSharesInPossession().get(0).getProfitLossOfShare());
     }
 
+/*
     public void calculateNewDepotBalanceOfUserEntity(DepotBalanceDTO depotBalanceDTO){
         if((depotBalanceDTO.isShouldIncrease())) {
             userEntity.setDepotBalance(userEntity.getDepotBalance() + (depotBalanceDTO.getAmount()));
@@ -214,4 +204,16 @@ public class InvestmentManagementService {
         }
         userService.saveUserEntity(userEntity);
     }
+
+    public void decreaseDepotBalanceOfUserEntity(){
+        userEntity.setDepotBalance(userEntity.getDepotBalance()-orderDTO.getPrice() * orderDTO.getUnits());
+    }
+
+    public void increaseDepotBalanceOfUserEntity() {
+        System.out.println("Update depot balance of user: " +orderDTO.getUserId());
+        userEntity.setDepotBalance(userEntity.getDepotBalance()
+                + singleStockInvestmentEntity.getSharesInPossession().get(0).getOpenPrice()
+                + singleStockInvestmentEntity.getSharesInPossession().get(0).getProfitLossOfShare());
+    }
+*/
 }

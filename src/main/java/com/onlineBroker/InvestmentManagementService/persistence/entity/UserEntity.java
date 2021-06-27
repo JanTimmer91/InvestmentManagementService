@@ -28,9 +28,8 @@ public class UserEntity {
     //Alternativ
     //private TreeMap<String, LinkedList<InvestmentEntity>> stockInvestments;
 
-    private double depotBalance;
+    //private double depotBalance;
     private double realizedProfitLossOfUserEntity;
-
 
     private ArrayList<String> watchlist;
 /*
