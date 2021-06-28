@@ -1,10 +1,10 @@
-package com.onlineBroker.InvestmentManagementService.dto;
+package com.onlineBroker.InvestmentManagementService.dto.responseDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+/*
 @Setter
 @Getter
 @AllArgsConstructor
@@ -14,3 +14,4 @@ public class DepotBalanceDTO {
     private Double amount;
     private boolean shouldIncrease;
 }
+*/

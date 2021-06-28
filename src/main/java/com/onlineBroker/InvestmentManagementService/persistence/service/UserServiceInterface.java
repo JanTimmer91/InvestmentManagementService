@@ -1,6 +1,6 @@
 package com.onlineBroker.InvestmentManagementService.persistence.service;
 
-import com.onlineBroker.InvestmentManagementService.dto.WatchlistDTO;
+import com.onlineBroker.InvestmentManagementService.dto.responseDTO.WatchlistResponseDTO;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.UserEntity;
 
 import java.util.ArrayList;
@@ -20,5 +20,5 @@ public interface UserServiceInterface {
 
     void removeWatchlistItem(String userId, String stockSymbol);
 
-    WatchlistDTO findWatchlist(String userId);
+    WatchlistResponseDTO findWatchlist(String userId);
 }

@@ -1,6 +1,6 @@
 package com.onlineBroker.InvestmentManagementService.controller.query;
 
-import com.onlineBroker.InvestmentManagementService.dto.WatchlistDTO;
+import com.onlineBroker.InvestmentManagementService.dto.responseDTO.WatchlistResponseDTO;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.StockInvestmentEntity;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.UserEntity;
 import com.onlineBroker.InvestmentManagementService.persistence.service.UserServiceImpl;
@@ -40,7 +40,7 @@ public class QueryController {
 
     @GetMapping(value = "/investmentService/users/{userId}/watchlist")
     @CrossOrigin(origins = {"http://localhost:3000"}) //for local development
-    public WatchlistDTO getWatchlist(@PathVariable String userId) {
+    public WatchlistResponseDTO getWatchlist(@PathVariable String userId) {
             return userServiceImpl.findWatchlist(userId);
     }
 

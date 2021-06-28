@@ -1,6 +1,6 @@
 package com.onlineBroker.InvestmentManagementService.persistence.service;
 
-import com.onlineBroker.InvestmentManagementService.dto.WatchlistDTO;
+import com.onlineBroker.InvestmentManagementService.dto.responseDTO.WatchlistResponseDTO;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.UserEntity;
 import com.onlineBroker.InvestmentManagementService.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,9 +86,9 @@ public class UserServiceImpl implements UserServiceInterface {
 
     }
 
-    public WatchlistDTO findWatchlist(String userId) {
+    public WatchlistResponseDTO findWatchlist(String userId) {
         System.out.println("Watchlist retrieved for user " +userId);
-        WatchlistDTO watchlistDTO = new WatchlistDTO(repository.findByUserId(userId).getWatchlist());
+        WatchlistResponseDTO watchlistDTO = new WatchlistResponseDTO(repository.findByUserId(userId).getWatchlist());
         return watchlistDTO;
     }
 }

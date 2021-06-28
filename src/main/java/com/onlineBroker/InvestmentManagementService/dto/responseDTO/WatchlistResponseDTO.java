@@ -1,4 +1,4 @@
-package com.onlineBroker.InvestmentManagementService.dto;
+package com.onlineBroker.InvestmentManagementService.dto.responseDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +11,6 @@ import java.util.ArrayList;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class WatchlistDTO {
+public class WatchlistResponseDTO {
     private ArrayList<String> watchlist;
 }

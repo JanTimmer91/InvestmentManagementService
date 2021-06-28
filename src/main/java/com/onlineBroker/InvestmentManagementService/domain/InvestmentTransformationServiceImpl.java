@@ -1,6 +1,6 @@
 package com.onlineBroker.InvestmentManagementService.domain;
 
-import com.onlineBroker.InvestmentManagementService.dto.OrderDTO;
+import com.onlineBroker.InvestmentManagementService.dto.requestDTO.OrderDTO;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.StockInvestmentEntity;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.ShareEntity;
 import com.onlineBroker.InvestmentManagementService.persistence.entity.UserEntity;

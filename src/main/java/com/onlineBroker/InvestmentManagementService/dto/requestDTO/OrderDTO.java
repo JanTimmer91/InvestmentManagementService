@@ -1,4 +1,4 @@
-package com.onlineBroker.InvestmentManagementService.dto;
+package com.onlineBroker.InvestmentManagementService.dto.requestDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
